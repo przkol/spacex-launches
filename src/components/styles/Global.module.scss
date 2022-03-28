@@ -1,0 +1,47 @@
+
+*{
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+
+.App{
+  background-image: url('../../spacex.jpg');
+  background-position: center;
+  background-attachment: fixed;
+  background-size: cover;
+  min-height: 100vh;
+  header{
+    display: flex;
+    align-items: center;
+    h1{
+      color: aliceblue;
+      margin-left: 10px;
+    }
+    label{
+      margin-left: 5px;
+      input{
+        background-color: transparent;
+        border: 1px solid white;
+        border-radius: 8px;
+        color: white;
+        padding: 3px 5px;
+        width: 205px;
+        &::placeholder{
+          color:#ccc;
+        }
+      }
+    }
+  }
+  &>div{
+    max-width: 1370px;
+    margin: 0 auto;
+    .FlightGallery{
+      max-width: 1500px;
+      background-color: red;
+    }
+  }
+
+}
+

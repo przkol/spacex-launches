@@ -1,17 +1,17 @@
 import { LaunchShort } from "../types/types";
 import { LaunchTile } from "./LaunchTile";
 import Container from "react-bootstrap/Container";
-import { Row, Col } from "react-bootstrap";
+import { Row } from "react-bootstrap";
 
-export const FlightGallery = (props: { launches: LaunchShort[] }) => {
+export const LaunchGallery = (props: { launches: LaunchShort[] }) => {
   if (props.launches?.length > 0) {
     return (
       <Container fluid className="FlightGallery ">
         <Row
           xxl={4}
           xl={4}
-          lg={3}
-          md={2}
+          lg={4}
+          md={3}
           sm={2}
           className="justify-content-center"
         >

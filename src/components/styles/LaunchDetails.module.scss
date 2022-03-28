@@ -1,0 +1,56 @@
+.launchDetails {
+  width: 100%;
+  max-width: 1260px;
+  background-color: rgba(255, 255, 255, .7);
+  margin: 5px auto;
+  border-radius: 20px;
+  padding: 10px ;
+  h2{
+    text-align: center;
+  }
+  span {
+    font-weight: bold;
+  }
+
+  .launchBasicInfo {
+    padding: 0 15px;
+  }
+
+  .rocket {
+    padding: 0 15px;
+
+    .rocketInfo {
+      padding: 0 5px;
+
+      .stages {
+        display: flex;
+        width: 100%;
+        justify-content: baseline;
+
+        .stageOne {
+          display: flex;
+          flex-direction: column;
+          width: 50%;
+          p{
+            &:first-of-type{
+              font-weight: bold;
+            }
+          }
+        }
+
+        .stageTwo {
+          display: flex;
+          flex-direction: column;
+          width: 50%;
+          p{
+            &:first-of-type{
+              font-weight: bold;
+            }
+          }
+        }
+      }
+
+    }
+
+  }
+}
