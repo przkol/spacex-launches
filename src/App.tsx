@@ -1,117 +1,106 @@
-import axios from "axios";
 import React, { useCallback, useEffect, useState } from "react";
 import { LaunchGallery } from "./components/LaunchGallery";
 import styles from "../src/components/styles/Global.module.scss";
 import { HashRouter, Routes, Route } from "react-router-dom";
 import { LaunchDetails } from "./components/LaunchDetails";
-import { LaunchShort } from "./types/types";
+import useRequestLaunches from "./components/useRequestLaunches";
 
 export const App = () => {
-  const spacexUrl = "https://api.spacex.land/graphql/";
-  const [launches, setLaunches] = useState<LaunchShort[]>([]);
   const [searchValue, setSearchValue] = useState<string>("");
-  const [moreLaunchesAvailable, setMoreLaunchesAvailable] =
-    useState<boolean>(true);
-  let requestPending: boolean = false;
-  const launchesPerPage = 10;
+  const [pageNo, setPageNo] = useState<number>(0);
+  const [newPageNeeded, setNewPageNeeded] = useState<boolean>(false);
+  const [nextPageBlock, setNextPageBlock] = useState<boolean>(false);
+  const launchesPerPage = 12;
+  const { newLaunches, error, moreLaunchesAvailable, loadingFlag } =
+    useRequestLaunches(searchValue, pageNo, launchesPerPage);
 
   const handleSearchInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchValue(e.target.value);
-    console.log(e.target.value);
+    setPageNo(0);
+    setNextPageBlock(false);
   };
-
-  const getLaunches = useCallback(async () => {
-    if ((!requestPending || searchValue.length > 0) && moreLaunchesAvailable) {
-      requestPending = true;
-      let cancel;
-      const newLaunches = await axios
-        .post(spacexUrl, {
-          timeout: 10000,
-          headers: { "Content-Type": "application/json" },
-          cancelToken: new axios.CancelToken((c) => (cancel = c)),
-          query: `query {
-          launchesPast(limit: ${launchesPerPage},offset: ${launches.length},find: { mission_name: "${searchValue}" }) {
-            launch_site {
-              site_name_long
-              site_name
-            }
-            launch_date_utc
-            rocket {
-              rocket_name
-            }
-            links {
-              article_link
-              video_link
-              flickr_images
-              presskit
-            }
-            details
-            mission_name
-            id
-          }
-        }
-      
-  `,
-        })
-        .then((response) => {
-          console.log(response);
-
-          return response.data.data.launchesPast;
-        })
-        .catch((err) => {
-          if (axios.isCancel(err)) return;
-          console.error(err);
-        });
-      if (newLaunches) {
-        setLaunches((prevState) => [...prevState, ...newLaunches]);
-      }
-      setMoreLaunchesAvailable(newLaunches?.length === launchesPerPage);
-      requestPending = false;
-    } else return;
-  }, [launches, moreLaunchesAvailable, searchValue]);
-
+  // CHECKS SCROLL VALUE & SETS 'NEED FOR A NEW PAGE' FLAG
   const checkScrollPos = useCallback(() => {
     const windowHeight = window.innerHeight;
     const offsetHeight = window.scrollY;
     const documentHeight = document.body.scrollHeight;
-    if (windowHeight + offsetHeight >= documentHeight - windowHeight) {
-      getLaunches();
+    if (
+      windowHeight + offsetHeight >= documentHeight - windowHeight &&
+      !loadingFlag &&
+      !nextPageBlock
+    ) {
+      setNewPageNeeded(true);
+    } else {
+      setNewPageNeeded(false);
     }
-  }, [getLaunches, launches, searchValue]);
+  }, [
+    searchValue,
+    newPageNeeded,
+    document.body.scrollHeight,
+    window.innerHeight,
+    window.scrollY,
+    nextPageBlock,
+  ]);
 
+  // INCREMENTS PAGE NUMBER
   useEffect(() => {
-    getLaunches();
-  }, []);
+    if (newPageNeeded) {
+      setPageNo((prevState) => prevState + 1);
+    }
+  }, [newPageNeeded]);
 
+  //
+  useEffect(() => {
+    if (moreLaunchesAvailable < launchesPerPage) setNextPageBlock(true);
+    else setNextPageBlock(false);
+  }, [moreLaunchesAvailable]);
+
+  // WINDOW SCROLL EVENT LISTENER FOR INFINITE SCROLL FUNC
   useEffect(() => {
     window.addEventListener("scroll", checkScrollPos);
     return () => {
       window.removeEventListener("scroll", checkScrollPos);
     };
-  }, [launches]);
-  return (
-    <HashRouter>
-      <div className={styles.App}>
-        <div>
-          <header>
-            <h1>SpaceX Launches</h1>
-            <label htmlFor="missionName">
-              <input
-                type="search"
-                name="missionName"
-                id="missionName"
-                placeholder="Search by mission name"
-                value={searchValue}
-                onChange={handleSearchInput}
+  }, [nextPageBlock]);
+
+  if (!error) {
+    return (
+      <HashRouter>
+        <div className={styles.App}>
+          <div>
+            <header>
+              <h1>SpaceX Launches</h1>
+              <label htmlFor="missionName">
+                <input
+                  type="search"
+                  name="missionName"
+                  id="missionName"
+                  placeholder="Search by mission name"
+                  value={searchValue}
+                  onChange={handleSearchInput}
+                />
+              </label>
+            </header>
+            <Routes>
+              <Route
+                path="/"
+                element={
+                  <LaunchGallery
+                    pageNo={pageNo}
+                    launchesPerPage={launchesPerPage}
+                    launches={newLaunches.filter((launch) =>
+                      launch.mission_name
+                        .toLowerCase()
+                        .includes(searchValue.toLowerCase())
+                    )}
+                  />
+                }
               />
-            </label>
-          </header>
-          <Routes>
-            <Route path="/" element={<LaunchGallery launches={launches} />} />
-            <Route path="mission/:id" element={<LaunchDetails />} />
-          </Routes>
+              <Route path="mission/:id" element={<LaunchDetails />} />
+            </Routes>
+          </div>
         </div>
-      </div>
-    </HashRouter>
-  );
+      </HashRouter>
+    );
+  } else if (error) return <div>Sorry, something went wrong</div>;
 };

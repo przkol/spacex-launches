@@ -12,7 +12,7 @@ export interface LaunchShort {
     flickr_images: string[]
   }
   details: string
-  id: number
+  id: string
 }
 
 export interface LaunchDetailed {
@@ -69,6 +69,8 @@ export interface LaunchDetailed {
   }
 }
 
-interface ListResponse<T> {
-  data: { launchesPast: T[] };
+export interface ListResponse<T> {
+
+  data: { launchesPast: T[] }
+
 }

@@ -11,8 +11,8 @@ export const LaunchDetails = () => {
   const [missionData, setMissionData] = useState<LaunchDetailed>();
   const [error, setError] = useState<boolean>(false);
 
+  // FETCH SINGLE LAUNCH FROM API
   const getLaunchDetails = useCallback(async (id: string = "0") => {
-    console.log(id);
     const res2 = await axios
       .post(spacexUrl, {
         timeout: 10000,
@@ -96,10 +96,11 @@ export const LaunchDetails = () => {
       });
     if (res2) setMissionData(res2);
   }, []);
+
+  // XXX TRIGGER DATA FETCH ON ID CHANGE
   useEffect(() => {
     getLaunchDetails(params.id);
   }, [params.id]);
-  console.log(missionData?.ships);
   if (missionData && !error) {
     return (
       <div className={styles.launchDetails}>

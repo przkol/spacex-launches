@@ -1,5 +1,5 @@
 
-
+/* THIS OVERRIDES NATURAL BOOTSTRAP STYLING OF CAROUSEL COMPONENTS WHICH MADE THEM TOO BIG */
 div.carousel.slide{
   overflow: hidden;
 padding: 0;

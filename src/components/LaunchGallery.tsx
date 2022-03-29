@@ -3,7 +3,11 @@ import { LaunchTile } from "./LaunchTile";
 import Container from "react-bootstrap/Container";
 import { Row } from "react-bootstrap";
 
-export const LaunchGallery = (props: { launches: LaunchShort[] }) => {
+export const LaunchGallery = (props: {
+  launches: LaunchShort[];
+  pageNo: number;
+  launchesPerPage: number;
+}) => {
   if (props.launches?.length > 0) {
     return (
       <Container fluid className="FlightGallery ">
@@ -15,9 +19,14 @@ export const LaunchGallery = (props: { launches: LaunchShort[] }) => {
           sm={2}
           className="justify-content-center"
         >
-          {props.launches.map((launch, index) => (
-            <LaunchTile launch={launch} key={index} />
-          ))}
+          {props.launches
+            .slice(
+              0,
+              props.pageNo * props.launchesPerPage + props.launchesPerPage
+            )
+            .map((launch, index) => (
+              <LaunchTile launch={launch} key={index} />
+            ))}
         </Row>
       </Container>
     );
